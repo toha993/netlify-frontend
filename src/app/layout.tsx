@@ -1,5 +1,3 @@
-// src/app/layout.tsx
-
 import Link from "next/link";
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -22,34 +20,35 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <style>{`
-          :root {
-            --navbar-bg: #f0f0f0;
-            --navbar-text: #333333;
-            --navbar-hover: #555555;
-          }
-        `}</style>
+        :root {
+          --navbar-bg: #f0f0f0;
+          --navbar-text: #333333;
+          --navbar-hover: #555555;
+        }
+      `}</style>
       </head>
       <body className={`${inter.className} bg-white min-h-screen`}>
         <nav
           style={{ backgroundColor: "var(--navbar-bg)" }}
-          className="shadow-md"
+          className="sticky top-0 z-10 shadow-md"
         >
           <div className="container mx-auto px-4">
-            <div className="flex gap-2 items-center py-4">
-              <Image
-                src="/optimizely-logo.png"
-                alt="Landscape picture"
-                width={32}
-                height={32}
-              />
-              <Link
-                href="/"
-                style={{ color: "var(--navbar-text)" }}
-                className="text-2xl font-bold hover:text-opacity-80 transition-colors duration-200"
-              >
-                Opti Retreat
-              </Link>
-              {/* You can add more nav items here if needed */}
+            <div className="flex justify-between items-center py-4">
+              <div className="flex gap-2 items-center">
+                <Image
+                  src="/optimizely-logo.png"
+                  alt="Landscape picture"
+                  width={32}
+                  height={32}
+                />
+                <Link
+                  href="/"
+                  style={{ color: "var(--navbar-text)" }}
+                  className="text-2xl font-bold hover:text-opacity-80 transition-colors duration-200"
+                >
+                  Opti Retreat
+                </Link>
+              </div>
             </div>
           </div>
         </nav>

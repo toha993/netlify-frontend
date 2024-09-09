@@ -3,6 +3,7 @@ import { supabase } from "./supabaseClient";
 export const handleVote = async (
   selectedItem: string,
   userId: string,
+  categoryId: string,
   existingVote: string | null
 ) => {
   try {
@@ -10,7 +11,7 @@ export const handleVote = async (
       if (existingVote !== selectedItem) {
         const { error } = await supabase
           .from("votes")
-          .update({ item_id: selectedItem })
+          .update({ item_id: selectedItem, category_id: categoryId })
           .eq("user_id", userId)
           .eq("item_id", existingVote);
 
@@ -29,7 +30,11 @@ export const handleVote = async (
     } else {
       const { error } = await supabase
         .from("votes")
-        .insert({ user_id: userId, item_id: selectedItem });
+        .insert({
+          user_id: userId,
+          item_id: selectedItem,
+          category_id: categoryId,
+        });
 
       if (error) throw error;
 

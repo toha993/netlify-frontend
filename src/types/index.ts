@@ -7,6 +7,7 @@ export interface Vote {
   id: string;
   user_id: string;
   item_id: string;
+  category_id: string;
 }
 
 export interface Item {
@@ -25,7 +26,6 @@ export interface ItemWithVotes extends Item {
   voteCount: number;
 }
 
-// Updated CategoryWithVoteCount interface
 export interface CategoryWithVoteCount extends Category {
   itemCount: number;
   voteCount: number;

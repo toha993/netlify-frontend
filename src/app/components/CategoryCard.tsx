@@ -26,9 +26,6 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             {category.name}
           </h2>
           <p className="text-gray-600 mb-2">Items: {category.itemCount}</p>
-          <p className="text-gray-600 mb-4">
-            Total Votes: {category.voteCount}
-          </p>
           {category.voteCount > 0 ? (
             <div className="h-64">
               <CategoryChart items={category.items} />
