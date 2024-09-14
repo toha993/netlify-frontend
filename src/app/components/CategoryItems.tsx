@@ -30,17 +30,45 @@ const CategoryItems: React.FC<CategoryItemsProps> = ({ id }) => {
   const [dialogMessage, setDialogMessage] = useState<string>("");
 
   useEffect(() => {
-    const initializeUser = async () => {
-      const userId = await getUserId();
-      setUserId(userId);
-      if (userId) {
-        await fetchCategories();
-        await fetchCategoryItems();
-        await checkPreviousVote(userId);
+    const fetchData = async () => {
+      setLoading(true);
+
+      try {
+        const [categoriesResponse, itemsResponse] = await Promise.all([
+          supabase.from("categories").select("*"),
+          supabase.from("items").select("*").eq("category_id", id),
+        ]);
+
+        if (categoriesResponse.error) throw categoriesResponse.error;
+        if (itemsResponse.error) throw itemsResponse.error;
+
+        setCategories(categoriesResponse.data as Category[]);
+        setItems(itemsResponse.data as Item[]);
+
+        const userId = await getUserId();
+        setUserId(userId);
+        if (userId) {
+          const { data, error } = await supabase
+            .from("votes")
+            .select("item_id")
+            .eq("user_id", userId)
+            .eq("category_id", id);
+
+          if (error) {
+            console.error("Error checking previous vote:", error);
+          } else if (data && data.length > 0) {
+            setExistingVote(data[0].item_id);
+            setSelectedItem(data[0].item_id);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    initializeUser();
+    fetchData();
   }, [id]);
 
   useEffect(() => {
@@ -50,49 +78,6 @@ const CategoryItems: React.FC<CategoryItemsProps> = ({ id }) => {
       setCurrentCategory(categories[index]);
     }
   }, [categories, id]);
-
-  const fetchCategoryItems = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("items")
-      .select("*")
-      .eq("category_id", id);
-
-    if (error) {
-      console.error("Error fetching items:", error);
-    } else {
-      setItems(data as Item[]);
-    }
-    setLoading(false);
-  };
-
-  const fetchCategories = async () => {
-    const { data, error } = await supabase.from("categories").select("*");
-
-    if (error) {
-      console.error("Error fetching categories:", error);
-    } else {
-      setCategories(data as Category[]);
-    }
-  };
-
-  const checkPreviousVote = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("votes")
-      .select("item_id")
-      .eq("user_id", userId)
-      .eq("category_id", id);
-
-    if (error) {
-      console.error("Error checking previous vote:", error);
-    } else if (data && data.length > 0) {
-      setExistingVote(data[0].item_id);
-      setSelectedItem(data[0].item_id);
-    } else {
-      setExistingVote(null);
-      setSelectedItem(null);
-    }
-  };
 
   const onVote = async () => {
     if (!selectedItem || !userId) return;

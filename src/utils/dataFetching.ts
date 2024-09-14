@@ -1,51 +1,28 @@
 import { supabase } from "./supabaseClient";
-import {
-  Category,
-  Item,
-  Vote,
-  CategoryWithVoteCount,
-  ItemWithVotes,
-} from "@/types";
+import { CategoryWithVoteCount, ItemWithVotes } from "@/types";
 
 export const fetchDashboardData = async (): Promise<
   CategoryWithVoteCount[]
 > => {
-  const [categoriesData, itemsData, votesData] = await Promise.all([
-    supabase.from("categories").select("*"),
-    supabase.from("items").select("*"),
-    supabase.from("votes").select("*"),
-  ]);
+  const { data, error } = await supabase.rpc("get_dashboard_data");
 
-  if (categoriesData.error) throw categoriesData.error;
-  if (itemsData.error) throw itemsData.error;
-  if (votesData.error) throw votesData.error;
+  if (error) throw error;
 
-  const categoriesWithCounts: CategoryWithVoteCount[] = (
-    categoriesData.data as Category[]
-  ).map((category) => {
-    const categoryItems: ItemWithVotes[] = (itemsData.data as Item[])
-      .filter((item) => item.category_id === category.id)
-      .map((item) => ({
-        ...item,
-        voteCount: (votesData.data as Vote[]).filter(
-          (vote) => vote.item_id === item.id
-        ).length,
-      }));
+  if (!data || !Array.isArray(data)) {
+    throw new Error("Invalid data returned from get_dashboard_data");
+  }
 
-    const totalVotes = categoryItems.reduce(
-      (sum, item) => sum + item.voteCount,
-      0
-    );
-
-    return {
-      ...category,
-      itemCount: categoryItems.length,
-      voteCount: totalVotes,
-      items: categoryItems
-        .sort((a, b) => b.voteCount - a.voteCount)
-        .slice(0, 5), // Top 5 items
-    };
-  });
-
-  return categoriesWithCounts;
+  return data.map((category: any) => ({
+    id: category.id,
+    name: category.name,
+    itemCount: category.itemcount,
+    voteCount: category.votecount,
+    items: category.items.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      img: item.img,
+      category_id: item.category_id,
+      voteCount: item.voteCount,
+    })),
+  }));
 };

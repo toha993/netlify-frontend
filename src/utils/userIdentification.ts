@@ -13,7 +13,6 @@ export async function getUserId(): Promise<string> {
       userId = generateUserId();
       localStorage.setItem("userId", userId);
 
-      // Save the new user to the database
       const { error } = await supabase
         .from("users")
         .insert({ id: userId, user_id: userId });
