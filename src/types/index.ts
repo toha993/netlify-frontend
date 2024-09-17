@@ -12,7 +12,7 @@ export interface Vote {
 
 export interface Item {
   id: string;
-  img: string;
+  img?: string;
   name: string;
   category_id: string;
 }
